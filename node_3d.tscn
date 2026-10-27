@@ -334,3 +334,5 @@ lanes = Array[int]([2, 4, 4, 2])
 prior_mag = 130.21646
 next_mag = 130.21646
 prior_pt_init = NodePath("../RP_008")
+
+[node name="PlayerCar" type="VehicleBody3D" parent="." unique_id=224554327]
