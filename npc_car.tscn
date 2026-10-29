@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://npc_car.gd" id="1_eknfn"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/sedan.glb" id="2_ma1i0"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/suv.glb" id="3_xefsg"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/suv-luxury.glb" id="4_sqt47"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/taxi.glb" id="5_1o4xj"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/van.glb" id="6_eafb0"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/police.glb" id="7_r7gq6"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/hatchback-sports.glb" id="8_qeotb"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/delivery.glb" id="9_1aoj1"]
+[ext_resource type="Script" path="res://addons/road-generator/nodes/road_lane_agent.gd" id="10_iaus2"]
+
+[node name="NpcCar" type="Node3D" unique_id=388832030 groups=["cars"]]
+script = ExtResource("1_eknfn")
+models = Array[PackedScene]([ExtResource("2_ma1i0"), ExtResource("3_xefsg"), ExtResource("4_sqt47"), ExtResource("5_1o4xj"), ExtResource("6_eafb0"), ExtResource("7_r7gq6"), ExtResource("8_qeotb"), ExtResource("9_1aoj1")])
+acceleration = 2
+target_speed = 12
+
+[node name="road_lane_agent" type="Node" parent="." unique_id=1623549964]
+unique_name_in_owner = true
+script = ExtResource("10_iaus2")
