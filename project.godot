@@ -24,6 +24,14 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/road-generator/plugin.cfg")
 
+[layer_names]
+
+3d_physics/layer_1="world"
+3d_physics/layer_2="vehicles"
+3d_physics/layer_3="pedestrians"
+3d_physics/layer_4="obstacles"
+3d_physics/layer_5="buildings"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

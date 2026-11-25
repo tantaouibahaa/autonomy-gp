@@ -11,12 +11,21 @@
 [ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/delivery.glb" id="9_1aoj1"]
 [ext_resource type="Script" path="res://addons/road-generator/nodes/road_lane_agent.gd" id="10_iaus2"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(1.9, 1.5, 4.4)
+
 [node name="NpcCar" type="Node3D" unique_id=388832030 groups=["cars"]]
 script = ExtResource("1_eknfn")
 models = Array[PackedScene]([ExtResource("2_ma1i0"), ExtResource("3_xefsg"), ExtResource("4_sqt47"), ExtResource("5_1o4xj"), ExtResource("6_eafb0"), ExtResource("7_r7gq6"), ExtResource("8_qeotb"), ExtResource("9_1aoj1")])
-acceleration = 2
-target_speed = 12
 
 [node name="road_lane_agent" type="Node" parent="." unique_id=1623549964]
 unique_name_in_owner = true
 script = ExtResource("10_iaus2")
+
+[node name="Body" type="AnimatableBody3D" parent="." unique_id=1739201844 groups=["vehicles"]]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body" unique_id=982746155]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("BoxShape3D_body")

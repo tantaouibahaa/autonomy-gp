@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://pedestrians/pedestrian.gd" id="1_ped"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-a.glb" id="m_a"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-b.glb" id="m_b"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-c.glb" id="m_c"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-d.glb" id="m_d"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-e.glb" id="m_e"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-f.glb" id="m_f"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-g.glb" id="m_g"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-h.glb" id="m_h"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-i.glb" id="m_i"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-j.glb" id="m_j"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-k.glb" id="m_k"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-l.glb" id="m_l"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-m.glb" id="m_m"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-n.glb" id="m_n"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-o.glb" id="m_o"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-p.glb" id="m_p"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-q.glb" id="m_q"]
+[ext_resource type="PackedScene" path="res://assets/characters/blocky/character-r.glb" id="m_r"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ped"]
+radius = 0.3
+height = 1.75
+
+[node name="Pedestrian" type="AnimatableBody3D" groups=["pedestrians"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_ped")
+models = Array[PackedScene]([ExtResource("m_a"), ExtResource("m_b"), ExtResource("m_c"), ExtResource("m_d"), ExtResource("m_e"), ExtResource("m_f"), ExtResource("m_g"), ExtResource("m_h"), ExtResource("m_i"), ExtResource("m_j"), ExtResource("m_k"), ExtResource("m_l"), ExtResource("m_m"), ExtResource("m_n"), ExtResource("m_o"), ExtResource("m_p"), ExtResource("m_q"), ExtResource("m_r")])
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape3D_ped")

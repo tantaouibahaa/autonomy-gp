@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://props/parked_car.gd" id="1_pc"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/sedan.glb" id="m_0"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/suv.glb" id="m_1"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/suv-luxury.glb" id="m_2"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/taxi.glb" id="m_3"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/van.glb" id="m_4"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/police.glb" id="m_5"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/hatchback-sports.glb" id="m_6"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/delivery.glb" id="m_7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pc"]
+size = Vector3(1.9, 1.5, 4.4)
+
+[node name="ParkedCar" type="Node3D"]
+script = ExtResource("1_pc")
+models = Array[PackedScene]([ExtResource("m_0"), ExtResource("m_1"), ExtResource("m_2"), ExtResource("m_3"), ExtResource("m_4"), ExtResource("m_5"), ExtResource("m_6"), ExtResource("m_7")])
+
+[node name="Body" type="StaticBody3D" parent="." groups=["obstacles", "vehicles"]]
+collision_layer = 10
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("BoxShape3D_pc")
