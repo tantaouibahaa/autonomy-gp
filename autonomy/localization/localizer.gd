@@ -82,6 +82,7 @@ func update(pos: Vector3) -> void:
 	while idx + 1 < route.size() and route[idx + 1].kind == "next" \
 			and offset >= network.lane_length(l) - 0.3:
 		idx += 1
+		_blend = Vector3.ZERO # the lane-change blend belongs to the lane it started on
 		l = lane()
 		offset = maxf(l.curve.get_closest_offset(l.to_local(pos)), route[idx].entry)
 	lane_error = (network.sample(l, offset)[0] + blend_at(offset) - pos).length()

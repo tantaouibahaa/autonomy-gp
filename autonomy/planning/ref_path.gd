@@ -65,13 +65,32 @@ static func build(loc: Localizer, planner: RoutePlanner, ahead: float, lat_accel
 		var into: RoadLane = nxt.lane
 		var others := planner.predecessors(into).filter(func(l): return l != lane and not l.has_meta("turn"))
 		if not others.is_empty() and not lane.has_meta("turn") and not into.has_meta("turn"):
-			p.events.append({kind = "merge", s = dist, lane = lane, into = into, others = others})
+			# Lanes that merge with a taper overlap before they meet: the
+			# conflict starts where the other lane comes within a car width.
+			var overlap := _overlap(net, lane, others)
+			p.events.append({kind = "merge", s = dist - overlap, lane = lane, into = into,
+					others = others, overlap = overlap})
 		k += 1
 		o = nxt.entry
 	p.length = dist
 	p._fix_dirs()
 	p._curvature_limits(lat_accel)
 	return p
+
+
+static func _overlap(net: TrafficNetwork, lane: RoadLane, others: Array) -> float:
+	var len := net.lane_length(lane)
+	var back := 0.0
+	while back < 80.0 and back < len:
+		var pt: Vector3 = net.sample(lane, len - back)[0]
+		var near := INF
+		for o: RoadLane in others:
+			var q := o.to_global(o.curve.sample_baked(o.curve.get_closest_offset(o.to_local(pt))))
+			near = minf(near, Vector2(q.x - pt.x, q.z - pt.z).length())
+		if near > 3.8:
+			break
+		back += 1.0
+	return back
 
 
 func _fix_dirs() -> void:

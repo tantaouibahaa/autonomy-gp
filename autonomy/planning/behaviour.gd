@@ -162,7 +162,9 @@ func decide(pos: Vector3, fwd: Vector3, v: float, path: RefPath, objects: Dictio
 	elif overtake and binding.get("kind", "") == "vehicle" and binding.dist < 60.0 \
 			and binding.v_end < cruise - 3.0:
 		lane_change_request = "overtake"
-	elif loc.next_step().get("kind", "") == "change":
+	elif loc.next_step().get("kind", "") == "change" \
+			and loc.network.lane_length(loc.lane()) - loc.offset < maxf(45.0, v * 4.0):
+		# Get into the lane the route needs, but not earlier than necessary.
 		lane_change_request = "route"
 
 	# 6. State.
@@ -306,10 +308,10 @@ func _merge_conflict(ev: Dictionary, path: RefPath, objects: Dictionary, v: floa
 			var sp: Array = net.sample(lane, off)
 			if sp[0].distance_to(o.pos) > 2.6:
 				continue
-			var d_o: float = net.lane_length(lane) - off + f.extra
+			var d_o: float = net.lane_length(lane) - off + f.extra - ev.get("overlap", 0.0)
 			var v_o: float = maxf(o.vel.dot(sp[1]), 0.0)
-			if d_o < 10.0:
-				return true # alongside us at the merge point
+			if d_o < 10.0 and d_o > -12.0:
+				return true # in or next to the merge zone
 			var t_o: float = d_o / maxf(v_o, 0.5)
 			if t_o > t_e - 1.2 and t_o < t_e + 2.5:
 				return true

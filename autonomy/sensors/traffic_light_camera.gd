@@ -13,7 +13,7 @@ extends Node3D
 enum { UNKNOWN = -1 }
 
 @export var max_range := 90.0
-@export var fov_deg := 150.0
+@export var fov_deg := 180.0
 @export_range(0.0, 1.0) var dropout := 0.03
 ## How long a reading is trusted after the light was last seen.
 @export var memory := 0.6

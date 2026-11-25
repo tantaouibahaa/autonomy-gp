@@ -54,7 +54,6 @@ func _ready() -> void:
 	ego = EGO_SCENE.instantiate()
 	add_child(ego)
 	_place(ego, city.get_node(start[0]), start[1])
-	ego.autopilot.setup(network)
 
 	var seeder := city.get_node("TrafficSeeder")
 	seeder.rng_seed = _seed
@@ -69,6 +68,7 @@ func _ready() -> void:
 	if not network.is_built:
 		await network.built
 	await get_tree().physics_frame # let the seeder place its cars first
+	ego.autopilot.setup(network) # the lane graph is complete now
 
 	match mode:
 		"scenario":

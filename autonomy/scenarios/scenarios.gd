@@ -32,7 +32,7 @@ const ALL := [
 		name = "road_works",
 		title = "Road works",
 		description = "Cones and barriers close the right lane; change lanes around them, then turn left at the T-junction.",
-		start = ["RoadManager/Ave_W3/RP_001/pR1_nR1", 2.0],
+		start = ["RoadManager/Ave_W2/RP_001/pR1_nR1", 20.0],
 		goal = ["RoadManager/Street_S/RP_001/pR0_nR0", 40.0],
 		time_limit = 120.0,
 	},
@@ -57,7 +57,7 @@ const ALL := [
 		title = "Cross-town route",
 		description = "A* route from the south-west of the city to the north-east: several signals, turns and live traffic.",
 		start = ["RoadManager/Street_W/RP_001/pR0_nR0", 4.0],
-		goal = ["RoadManager/Corner_NE/RP_003/pR0_nR0", 25.0],
+		goal = ["RoadManager/Corner_NE/RP_003/pF0_nF0", 25.0],
 		time_limit = 300.0,
 	},
 ]

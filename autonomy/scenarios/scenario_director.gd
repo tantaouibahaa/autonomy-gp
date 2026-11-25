@@ -47,7 +47,8 @@ func start(scenario: Dictionary, ego_car: VehicleBody3D, city_root: Node3D, net:
 					["RoadManager/Ave_E1/RP_001/pR0_nR0", 22.0], ["RoadManager/Ave_E2/RP_001/pF0_nF0", 5.0]])
 		"highway_merge":
 			var npcs := []
-			for off in [110.0, 140.0, 170.0, 200.0, 230.0, 260.0]:
+			# Timed to reach the merge point about when the ego car does.
+			for off in [20.0, 50.0, 80.0, 110.0, 140.0, 170.0]:
 				npcs.append(["RoadManager/HW_Loop/RP_007/pR2_nR2", off])
 			_spawn_npcs(npcs)
 
@@ -62,6 +63,14 @@ func _physics_process(delta: float) -> void:
 				ego.global_position.snapped(Vector3.ONE * 0.1), ego.speed(), ap.behaviour.target_speed, ap.accel,
 				ap.behaviour.state_name(), ap.behaviour.reason,
 				ap.loc.lane().name if ap.loc.has_route() else "-", ap.loc.offset, ap.loc.lane_error, ap.perception.objects.size()])
+		if ap.path:
+			print("   events: ", ap.path.events.map(func(e): return "%s@%.0f" % [e.kind, e.s]), " route: ", ap.loc.route.slice(ap.loc.idx, ap.loc.idx + 4).map(func(r): return "%s/%s:%s" % [r.lane.get_parent().name, r.lane.name, r.kind]))
+		if def.name == "highway_merge":
+			var near := []
+			for c in city.get_node("RoadManager/vehicles").get_children():
+				if c.global_position.distance_to(ego.global_position) < 120.0:
+					near.append(str(c.global_position.round()) + "@" + str(snappedf(c.speed, 0.1)))
+			print("   npcs<120m: ", near)
 	if _jaywalker and ego.global_position.x >= _jaywalk_trigger_x:
 		_jaywalk_trigger_x = INF
 		_jaywalker._wait = 0.0 # step off the kerb now
@@ -114,7 +123,7 @@ func _setup_red_light() -> void:
 
 func _setup_jaywalker() -> void:
 	# Mid-block on Cross_S1, stepping off the right-hand kerb.
-	var x := -100.0
+	var x := -88.0
 	var walk := ScriptedWalk.new()
 	walk.name = "JaywalkPath"
 	walk.setup(Vector3(x, 0.15, 60.2), Vector3(x, 0.15, 37.8))
@@ -128,7 +137,7 @@ func _setup_jaywalker() -> void:
 	_jaywalker._wait = INF
 	add_child(_jaywalker)
 	_jaywalker._speed = 1.5
-	_jaywalk_trigger_x = x - 30.0
+	_jaywalk_trigger_x = x - 28.0
 
 
 func _spawn_npcs(spots: Array) -> void:
@@ -139,3 +148,5 @@ func _spawn_npcs(spots: Array) -> void:
 		var car = vehicles.add_actor(pos, lane)
 		if car:
 			car.place(network, lane, spot[1])
+	if Session.trace:
+		print("spawned %d scenario NPCs" % spots.size())
