@@ -65,12 +65,6 @@ func _physics_process(delta: float) -> void:
 				ap.loc.lane().name if ap.loc.has_route() else "-", ap.loc.offset, ap.loc.lane_error, ap.perception.objects.size()])
 		if ap.path:
 			print("   events: ", ap.path.events.map(func(e): return "%s@%.0f" % [e.kind, e.s]), " route: ", ap.loc.route.slice(ap.loc.idx, ap.loc.idx + 4).map(func(r): return "%s/%s:%s" % [r.lane.get_parent().name, r.lane.name, r.kind]))
-		if def.name == "highway_merge":
-			var near := []
-			for c in city.get_node("RoadManager/vehicles").get_children():
-				if c.global_position.distance_to(ego.global_position) < 120.0:
-					near.append(str(c.global_position.round()) + "@" + str(snappedf(c.speed, 0.1)))
-			print("   npcs<120m: ", near)
 	if Session.trace_from >= 0.0 and time >= Session.trace_from and Engine.get_physics_frames() % 6 == 0:
 		var inv := ego.global_transform.affine_inverse()
 		var lines := []

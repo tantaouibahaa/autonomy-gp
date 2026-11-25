@@ -62,8 +62,10 @@ func _ready() -> void:
 	cam.target = ego
 	hud.ego = ego
 	hud.seed_value = _seed
-	if Session.batch:
-		ego.front_lidar.show_debug = false
+	if Session.demo_view >= 0:
+		ego.front_lidar.show_debug = true
+		ego.surround_lidar.show_debug = true
+		cam.view = Session.demo_view
 
 	if not network.is_built:
 		await network.built

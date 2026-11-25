@@ -24,6 +24,8 @@ var queue: Array = []
 var results: Array = []
 var out_dir := "res://results"
 var race_result := {}
+## Camera view for --demo runs, -1 otherwise.
+var demo_view := -1
 
 var _child_pid := -1
 var _run_time := 0.0
@@ -43,6 +45,18 @@ func _physics_process(delta: float) -> void:
 				collisions = -1, red_light_violations = -1, min_ped_distance = -1.0,
 				lane_dev_mean = -1.0, lane_dev_max = -1.0, jerk_rms = -1.0, jerk_max = -1.0,
 				max_decel = -1.0, distance = -1.0})
+
+
+func _enter_tree() -> void:
+	# The main scene enters the tree before autoloads get _ready, and sim.gd
+	# needs to know right away whether this is a batch run.
+	var args := OS.get_cmdline_user_args()
+	batch = "--race" in args or "--scenarios" in args
+	# --demo <scenario>: play one scenario with the lidar view on (for captures).
+	var demo := _arg(args, "--demo")
+	if demo != "" and not batch:
+		config = {mode = "scenario", scenario = demo, seed = int(_arg(args, "--seeds", "1")), laps = 0}
+		demo_view = int(_arg(args, "--view", "1"))
 
 
 func _ready() -> void:
@@ -188,11 +202,16 @@ func _relaunch(args: PackedStringArray) -> void:
 			print(line)
 		else:
 			OS.delay_msec(20)
-	while true:
+	# Drain what is left; a non-blocking pipe never reports EOF, so stop
+	# after a run of empty reads.
+	var empty := 0
+	while empty < 25:
 		var rest := io.get_line()
-		if rest == "" and io.eof_reached():
-			break
-		if rest != "":
+		if rest == "":
+			empty += 1
+			OS.delay_msec(10)
+		else:
+			empty = 0
 			print(rest)
 	get_tree().quit(OS.get_process_exit_code(_child_pid))
 
