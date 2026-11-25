@@ -105,9 +105,9 @@ max_range = 70.0
 [node name="SurroundLidar" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
 script = ExtResource("4_lidar")
-beams = 40
+beams = 96
 fov_deg = 360.0
-max_range = 50.0
+max_range = 70.0
 
 [node name="ForwardShapeCast" type="ShapeCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 2.3)

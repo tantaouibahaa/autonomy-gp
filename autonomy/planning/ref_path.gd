@@ -32,7 +32,9 @@ static func build(loc: Localizer, planner: RoutePlanner, ahead: float, lat_accel
 		var lane: RoadLane = step.lane
 		var len := net.lane_length(lane)
 		var last := k == loc.route.size() - 1
-		var end := loc.goal_offset if last else len
+		# Past the goal the path runs on a bit, so the car still sees what is
+		# parked just beyond it.
+		var end := minf(loc.goal_offset + 15.0, len) if last else len
 		var limit := net.speed_limit(lane)
 		if lane.has_meta("signal") and lane.get_meta("stop_offset") > o - 0.5:
 			p.events.append({kind = "signal", s = dist + lane.get_meta("stop_offset") - o, lane = lane})
@@ -56,7 +58,7 @@ static func build(loc: Localizer, planner: RoutePlanner, ahead: float, lat_accel
 			break
 		dist -= x - end # land exactly on the lane end
 		if last:
-			p.events.append({kind = "goal", s = dist})
+			p.events.append({kind = "goal", s = dist - (end - loc.goal_offset)})
 			break
 		var nxt: Dictionary = loc.route[k + 1]
 		if nxt.kind != "next":

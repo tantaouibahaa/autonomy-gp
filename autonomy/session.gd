@@ -18,6 +18,8 @@ var config := {mode = "free", scenario = "", seed = 0, laps = 3}
 var batch := false
 ## --trace: print the car's state once a second during scenario runs.
 var trace := false
+## --trace-from T: per-frame object dump from scenario time T on.
+var trace_from := -1.0
 var queue: Array = []
 var results: Array = []
 var out_dir := "res://results"
@@ -51,6 +53,7 @@ func _ready() -> void:
 		return
 	batch = true
 	trace = "--trace" in args
+	trace_from = float(_arg(args, "--trace-from", "-1"))
 	out_dir = _arg(args, "--out", "res://results")
 	if not "--no-relaunch" in args and OS.get_environment("AUTONOMY_GP_CHILD") == "":
 		_relaunch(args)

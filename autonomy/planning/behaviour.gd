@@ -53,6 +53,8 @@ var overtake := false
 
 var planner: RoutePlanner
 var _upstream_cache := {}
+## Seconds to keep yielding at a merge after the last conflict seen.
+var _merge_hold := 0.0
 
 
 func state_name() -> String:
@@ -63,6 +65,7 @@ func state_name() -> String:
 func decide(pos: Vector3, fwd: Vector3, v: float, path: RefPath, objects: Dictionary,
 		camera: TrafficLightCamera, loc: Localizer, dt: float) -> void:
 	var cons := [] # {s, v_end, kind, label, obj}
+	_merge_hold -= dt
 	light = {}
 	lead = {}
 	lane_change_request = ""
@@ -95,8 +98,14 @@ func decide(pos: Vector3, fwd: Vector3, v: float, path: RefPath, objects: Dictio
 				if ev.s > -0.5 and ev.s < 30.0 and _yield_conflict(ev, path, objects):
 					cons.append({s = ev.s - 1.0, v_end = 0.0, kind = "yield", label = "roundabout"})
 			"merge":
-				if ev.s > -0.5 and ev.s < 60.0 and _merge_conflict(ev, path, objects, v, loc):
-					cons.append({s = ev.s - 1.5, v_end = 0.0, kind = "yield", label = "merge"})
+				# Yield before the taper. Past its start we are committed: no
+				# stopping where the lanes overlap (we only react to what is
+				# ahead of us, like any other traffic).
+				if ev.s < 60.0 and ev.s > -0.5:
+					if _merge_conflict(ev, path, objects, v, loc):
+						_merge_hold = 2.0
+					if _merge_hold > 0.0:
+						cons.append({s = ev.s - 1.5, v_end = 0.0, kind = "yield", label = "merge"})
 			"goal":
 				cons.append({s = ev.s, v_end = 0.0, kind = "goal", label = "goal"})
 			"end":
@@ -170,7 +179,9 @@ func decide(pos: Vector3, fwd: Vector3, v: float, path: RefPath, objects: Dictio
 	# 6. State.
 	var reached_goal := false
 	for ev in path.events:
-		if ev.kind == "goal" and ev.s < 1.5:
+		# At the goal, or held up right next to it by a stopped vehicle.
+		if ev.kind == "goal" and (ev.s < 1.5 or (ev.s < 12.0 and binding.get("kind", "") == "vehicle" \
+				and binding.v_end < 0.5)):
 			reached_goal = true
 	if reached_goal and v < 0.6:
 		state = State.ARRIVED
@@ -244,6 +255,11 @@ func _predict_entry(o: Dictionary, path: RefPath, corridor: float, ego_v: float)
 		return {}
 	var i: int = pr.index
 	var dir: Vector3 = path.dirs[i]
+	# Must sit beside the path, not off its start (e.g. right behind us).
+	var off_path: Vector3 = o.pos - path.pts[i]
+	off_path.y = 0.0
+	if absf(off_path.dot(dir)) > 2.0:
+		return {}
 	var normal := dir.cross(Vector3.UP)
 	var d0: float = (o.pos - path.pts[i]).dot(normal)
 	var vd: float = o.vel.dot(normal)
@@ -293,7 +309,11 @@ func _yield_conflict(ev: Dictionary, path: RefPath, objects: Dictionary) -> bool
 ## merge point within a couple of seconds of us?
 func _merge_conflict(ev: Dictionary, path: RefPath, objects: Dictionary, v: float, loc: Localizer) -> bool:
 	var net := loc.network
-	var t_e: float = ev.s / maxf(v, 3.0)
+	var overlap: float = ev.get("overlap", 0.0)
+	var ours_to_end: float = ev.s + overlap
+	var inside: bool = ev.s <= -0.5
+	# Time for us to get all the way through the merge, speeding up at 2 m/s^2.
+	var t_e := (-v + sqrt(v * v + 4.0 * maxf(ours_to_end, 0.0))) / 2.0
 	var key: RoadLane = ev.into
 	if not key in _upstream_cache:
 		_upstream_cache[key] = _upstream(net, ev.others, 160.0)
@@ -308,12 +328,22 @@ func _merge_conflict(ev: Dictionary, path: RefPath, objects: Dictionary, v: floa
 			var sp: Array = net.sample(lane, off)
 			if sp[0].distance_to(o.pos) > 2.6:
 				continue
-			var d_o: float = net.lane_length(lane) - off + f.extra - ev.get("overlap", 0.0)
+			var theirs_to_end: float = net.lane_length(lane) - off + f.extra
 			var v_o: float = maxf(o.vel.dot(sp[1]), 0.0)
-			if d_o < 10.0 and d_o > -12.0:
-				return true # in or next to the merge zone
-			var t_o: float = d_o / maxf(v_o, 0.5)
-			if t_o > t_e - 1.2 and t_o < t_e + 2.5:
+			var behind := theirs_to_end > ours_to_end + 1.0
+			# A car stopped behind us (usually waiting for us) is no conflict:
+			# whoever is ahead goes first, which breaks the standoff. Once we
+			# are in the taper we are committed and only yield to cars ahead.
+			if behind and (v_o < 1.0 or inside):
+				break
+			if absf(theirs_to_end - ours_to_end) < 8.0:
+				return true # alongside
+			var t_o := theirs_to_end / maxf(v_o, 0.5)
+			# Conflict unless it clears the merge well before us, or reaches
+			# it well after we are through: we join slower than the traffic,
+			# so a fast car needs a long gap to slow down behind us.
+			var slack := 2.0 + clampf(v_o - v, 0.0, 20.0) * 0.25
+			if t_o > t_e - 1.5 and t_o < t_e + slack:
 				return true
 			break
 	return false

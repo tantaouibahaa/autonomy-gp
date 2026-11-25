@@ -145,7 +145,11 @@ func step(delta: float) -> void:
 			a = minf(a, -behaviour.required_decel * 1.05)
 	a = clampf(a, -max_decel, max_accel)
 	var emergency := behaviour.state == Behaviour.State.EMERGENCY_BRAKE
-	var j := 40.0 if emergency or a < accel - 4.0 else jerk_limit
+	var j := jerk_limit
+	if emergency or a < accel - 4.0:
+		j = 40.0 # brake hard now
+	elif accel < 0.0 and a > accel:
+		j = 15.0 # come off the brakes quickly
 	accel = move_toward(accel, a, j * delta)
 
 

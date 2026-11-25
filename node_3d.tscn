@@ -5000,5 +5000,3 @@ keep_clear_of = NodePath("../RoadManager/PlayerCar")
 [node name="Pedestrians" type="Node3D" parent="." unique_id=1224476355]
 script = ExtResource("34_if4ww")
 pedestrian_scene = ExtResource("35_brp11")
-
-[node name="Area3D" type="Area3D" parent="." unique_id=1997359709]

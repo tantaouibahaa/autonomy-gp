@@ -16,11 +16,17 @@ const CLASS_BY_LAYER := {2: "vehicle", 4: "pedestrian", 8: "obstacle", 16: "buil
 ## Layers 2-5: vehicles, pedestrians, obstacles, buildings.
 @export_flags_3d_physics var mask := 2 | 4 | 8 | 16
 @export var show_debug := false: set = set_show_debug
+## Shift the fan by half a beam spacing every other scan, like a spinning
+## lidar's interleaved firing: twice the angular resolution over two frames.
+@export var interleave := true
 
 ## Returns of the last scan: Array of {point, collider, cls, distance}.
 var hits: Array = []
 
 var _rays: Array[RayCast3D] = []
+var _angles := PackedFloat32Array()
+var _step := 0.0
+var _scans := 0
 var _viz: MeshInstance3D
 var _mesh: ImmediateMesh
 var _mat_hit: StandardMaterial3D
@@ -35,6 +41,7 @@ func _ready() -> void:
 			a = TAU * i / beams
 		else:
 			a = deg_to_rad(-fov_deg / 2.0 + fov_deg * i / maxf(beams - 1, 1))
+		_angles.append(a)
 		var ray := RayCast3D.new()
 		ray.target_position = Vector3(sin(a), 0.0, cos(a)) * max_range
 		ray.collision_mask = mask
@@ -43,12 +50,19 @@ func _ready() -> void:
 			ray.add_exception(body)
 		add_child(ray)
 		_rays.append(ray)
+	_step = TAU / beams if fov_deg >= 359.0 else deg_to_rad(fov_deg) / maxf(beams - 1, 1)
 	set_show_debug(show_debug)
 
 
 ## Cast every beam now and refresh `hits`.
 func scan() -> void:
 	hits.clear()
+	_scans += 1
+	if interleave:
+		var shift := _step * 0.5 * (_scans % 2)
+		for i in _rays.size():
+			var a := _angles[i] + shift
+			_rays[i].target_position = Vector3(sin(a), 0.0, cos(a)) * max_range
 	for ray in _rays:
 		ray.force_raycast_update()
 		if not ray.is_colliding():

@@ -71,6 +71,20 @@ func _physics_process(delta: float) -> void:
 				if c.global_position.distance_to(ego.global_position) < 120.0:
 					near.append(str(c.global_position.round()) + "@" + str(snappedf(c.speed, 0.1)))
 			print("   npcs<120m: ", near)
+	if Session.trace_from >= 0.0 and time >= Session.trace_from and Engine.get_physics_frames() % 6 == 0:
+		var inv := ego.global_transform.affine_inverse()
+		var lines := []
+		for id in ego.perception.objects:
+			var o: Dictionary = ego.perception.objects[id]
+			var rel: Vector3 = inv * o.pos
+			if o.cls != "building" and rel.length() < 25.0:
+				lines.append("%s(%.1f,%.1f v=%.1f,%.1f n=%d)" % [o.cls.left(3), rel.x, rel.z, o.vel.x, o.vel.z, o.points.size()])
+		var truth := []
+		for c in city.get_node("RoadManager/vehicles").get_children():
+			var rel: Vector3 = inv * c.global_position
+			if rel.length() < 15.0:
+				truth.append("(%.1f,%.1f %s %.1f)" % [rel.x, rel.z, c.blocked_by, c.speed])
+		print("  %.2f v=%.2f st=%s tgt=%.2f | seen %s | npcs %s" % [time, ego.speed(), ego.autopilot.behaviour.state_name(), ego.autopilot.behaviour.target_speed, " ".join(lines), " ".join(truth)])
 	if _jaywalker and ego.global_position.x >= _jaywalk_trigger_x:
 		_jaywalk_trigger_x = INF
 		_jaywalker._wait = 0.0 # step off the kerb now

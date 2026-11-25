@@ -12,7 +12,7 @@ extends Node
 @export var lidar_paths: Array[NodePath] = []
 @export var shapecast_path: NodePath
 ## Seconds an object survives without returns before it is dropped.
-@export var forget_after := 0.4
+@export var forget_after := 0.8
 @export var velocity_smoothing := 0.25
 
 ## id -> {id, cls, pos, vel, points: Array[Vector3], last_seen, age}
@@ -86,8 +86,16 @@ func update(delta: float) -> void:
 		o.points = pts
 		o.last_seen = _time
 	for id in objects.keys():
-		if _time - objects[id].last_seen > forget_after:
+		var o: Dictionary = objects[id]
+		if _time - o.last_seen > forget_after:
 			objects.erase(id)
+		elif not id in frame:
+			# Coast on the last velocity while the beams miss it.
+			o.pos += o.vel * delta
+			var shifted := []
+			for p in o.points:
+				shifted.append(p + o.vel * delta)
+			o.points = shifted
 
 
 func _add(frame: Dictionary, cls_of: Dictionary, collider: Object, p: Vector3, cls: String) -> void:

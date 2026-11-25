@@ -46,8 +46,11 @@ func _on_collided(body: Node) -> void:
 	var id := body.get_instance_id()
 	if time - _last_hit.get(id, -INF) > 2.0:
 		collisions += 1
-		collision_log.append({time = snappedf(time, 0.01), what = String(body.name),
-				cls = Lidar.classify(body), speed = snappedf(_ego.speed(), 0.01)})
+		var rel: Vector3 = _ego.global_transform.affine_inverse() * (body as Node3D).global_position
+		collision_log.append({time = snappedf(time, 0.01), what = String(body.get_parent().name if body.name == "Body" else body.name),
+				cls = Lidar.classify(body), speed = snappedf(_ego.speed(), 0.01),
+				# where the other body was, in the car's frame (+z ahead, +x left)
+				where = [snappedf(rel.x, 0.1), snappedf(rel.z, 0.1)]})
 	_last_hit[id] = time
 
 
