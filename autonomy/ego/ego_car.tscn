@@ -1,0 +1,132 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://autonomy/ego/ego_car.gd" id="1_ego"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/sedan-sports.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_car_kit/wheel-default.glb" id="3_wheel"]
+[ext_resource type="Script" path="res://autonomy/sensors/lidar.gd" id="4_lidar"]
+[ext_resource type="Script" path="res://autonomy/sensors/perception.gd" id="5_perc"]
+[ext_resource type="Script" path="res://autonomy/sensors/traffic_light_camera.gd" id="6_cam"]
+[ext_resource type="Script" path="res://autonomy/autopilot.gd" id="7_ap"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(1.9, 1.1, 4.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cast"]
+size = Vector3(2.0, 0.8, 0.5)
+
+[node name="EgoCar" type="VehicleBody3D" groups=["player", "ego"]]
+collision_layer = 2
+collision_mask = 31
+mass = 1200.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+contact_monitor = true
+max_contacts_reported = 8
+script = ExtResource("1_ego")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("BoxShape3D_body")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+
+[node name="FrontLeft" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.6, 0.99)
+use_as_steering = true
+wheel_roll_influence = 0.05
+wheel_radius = 0.45
+wheel_rest_length = 0.15
+wheel_friction_slip = 4.0
+suspension_travel = 0.15
+suspension_stiffness = 60.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="WheelModel" parent="FrontLeft" instance=ExtResource("3_wheel")]
+transform = Transform3D(-1.5, 0, -1.3113416e-07, 0, 1.5, 0, 1.3113416e-07, 0, -1.5, 0, 0, 0)
+
+[node name="FrontRight" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.64, 0.6, 0.99)
+use_as_steering = true
+wheel_roll_influence = 0.05
+wheel_radius = 0.45
+wheel_rest_length = 0.15
+wheel_friction_slip = 4.0
+suspension_travel = 0.15
+suspension_stiffness = 60.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="WheelModel" parent="FrontRight" instance=ExtResource("3_wheel")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+
+[node name="RearLeft" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.64, 0.6, -0.99)
+use_as_traction = true
+wheel_roll_influence = 0.05
+wheel_radius = 0.45
+wheel_rest_length = 0.15
+wheel_friction_slip = 4.0
+suspension_travel = 0.15
+suspension_stiffness = 60.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="WheelModel" parent="RearLeft" instance=ExtResource("3_wheel")]
+transform = Transform3D(-1.5, 0, -1.3113416e-07, 0, 1.5, 0, 1.3113416e-07, 0, -1.5, 0, 0, 0)
+
+[node name="RearRight" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.64, 0.6, -0.99)
+use_as_traction = true
+wheel_roll_influence = 0.05
+wheel_radius = 0.45
+wheel_rest_length = 0.15
+wheel_friction_slip = 4.0
+suspension_travel = 0.15
+suspension_stiffness = 60.0
+suspension_max_force = 12000.0
+damping_compression = 1.2
+damping_relaxation = 1.6
+
+[node name="WheelModel" parent="RearRight" instance=ExtResource("3_wheel")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+
+[node name="FrontLidar" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 2.05)
+script = ExtResource("4_lidar")
+beams = 48
+fov_deg = 120.0
+max_range = 70.0
+
+[node name="SurroundLidar" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+script = ExtResource("4_lidar")
+beams = 40
+fov_deg = 360.0
+max_range = 50.0
+
+[node name="ForwardShapeCast" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 2.3)
+enabled = false
+shape = SubResource("BoxShape3D_cast")
+target_position = Vector3(0, 0, 25)
+max_results = 8
+collision_mask = 14
+
+[node name="LightCamera" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0.9)
+script = ExtResource("6_cam")
+
+[node name="Perception" type="Node" parent="."]
+script = ExtResource("5_perc")
+lidar_paths = Array[NodePath]([NodePath("../FrontLidar"), NodePath("../SurroundLidar")])
+shapecast_path = NodePath("../ForwardShapeCast")
+
+[node name="Autopilot" type="Node" parent="."]
+script = ExtResource("7_ap")
+perception_path = NodePath("../Perception")
+camera_path = NodePath("../LightCamera")

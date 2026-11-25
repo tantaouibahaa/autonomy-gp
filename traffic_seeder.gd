@@ -11,6 +11,8 @@ extends Node
 @export var min_spacing := 20.0
 ## Keep this far from the player car.
 @export var clear_radius := 40.0
+## Seed for where cars are placed; 0 picks a random layout every run.
+@export var rng_seed := 0
 
 
 func _ready() -> void:
@@ -36,7 +38,10 @@ func _seed_cars(network: TrafficNetwork) -> void:
 	for l in lanes:
 		weights.append(network.lane_length(l))
 	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	if rng_seed != 0:
+		rng.seed = rng_seed
+	else:
+		rng.randomize()
 
 	var taken: Array[Vector3] = []
 	var placed := 0

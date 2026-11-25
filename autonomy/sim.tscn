@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://autonomy/sim.gd" id="1_sim"]
+[ext_resource type="Script" path="res://autonomy/ui/hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://autonomy/ui/chase_camera.gd" id="4_cam"]
+
+[node name="Sim" type="Node3D"]
+script = ExtResource("1_sim")
+
+[node name="ChaseCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0)
+current = true
+fov = 70.0
+far = 1500.0
+script = ExtResource("4_cam")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+script = ExtResource("3_hud")

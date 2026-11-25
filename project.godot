@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="AutonomyGP"
-run/main_scene="res://node_3d.tscn"
+run/main_scene="res://autonomy/sim.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Session="*res://autonomy/session.gd"
 
 [display]
 
